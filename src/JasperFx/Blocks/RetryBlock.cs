@@ -49,7 +49,9 @@ public class RetryBlock<T> : IRetryBlock<T>, IDisposable
 
         _cancellationToken = cancellationToken;
 
-        _block = new Block<Item>(executeAsync);
+        // Retrying posts back onto this block from its own reader. A bounded queue could
+        // deadlock when saturated, so retries must never wait for write capacity (GH-3287).
+        _block = new Block<Item>(1, Block<Item>.Unbounded, executeAsync);
     }
 
     public RetryBlock(IItemHandler<T> handler, ILogger logger, CancellationToken cancellationToken,
@@ -67,7 +69,9 @@ public class RetryBlock<T> : IRetryBlock<T>, IDisposable
 
         _cancellationToken = cancellationToken;
 
-        _block = new Block<Item>(executeAsync);
+        // Retrying posts back onto this block from its own reader. A bounded queue could
+        // deadlock when saturated, so retries must never wait for write capacity (GH-3287).
+        _block = new Block<Item>(1, Block<Item>.Unbounded, executeAsync);
     }
 
     public int MaximumAttempts { get; set; } = 3;
