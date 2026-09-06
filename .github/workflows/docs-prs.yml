@@ -14,8 +14,12 @@ env:
   node_version: 20.x
   NUKE_TELEMETRY_OPTOUT: true
 
+permissions:
+  contents: read
+
 jobs:
   run:
+    if: github.repository == 'JasperFx/jasperfx'
     name: "linting, spell check and build"
     runs-on: ubuntu-latest
     steps:

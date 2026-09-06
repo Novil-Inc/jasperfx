@@ -1,0 +1,45 @@
+name: Novil core validation
+on:
+  push:
+    branches: [novil/1.19]
+  pull_request:
+    branches: [novil/1.19]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  core:
+    if: github.repository == 'Novil-Inc/jasperfx'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.x
+      - name: Build core
+        run: dotnet build src/JasperFx/JasperFx.csproj -c Release -p:ContinuousIntegrationBuild=true
+      - name: Test supported frameworks sequentially
+        shell: bash
+        run: |
+          status=0
+          for tfm in net8.0 net9.0 net10.0; do
+            for suite in CoreTests CodegenTests CommandLineTests; do
+              dotnet test "src/$suite/$suite.csproj" -c Release -f "$tfm" -p:ContinuousIntegrationBuild=true --logger "trx;LogFileName=$suite-$tfm.trx" --results-directory artifacts/tests || status=1
+            done
+          done
+          exit "$status"
+      - name: Pack core only
+        run: dotnet pack src/JasperFx/JasperFx.csproj -c Release --no-build -p:ContinuousIntegrationBuild=true -o artifacts/packages
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jasperfx-validation
+          path: artifacts/
+          if-no-files-found: error

@@ -17,8 +17,12 @@ env:
   node_version: 20.x
   NUKE_TELEMETRY_OPTOUT: true
 
+permissions:
+  contents: read
+
 jobs:
   build-and-test-code:
+    if: github.repository == 'JasperFx/jasperfx'
     name: Build and deploy docs to Netlify
     # use system defined below in the tests matrix
     runs-on: ${{ matrix.os }}

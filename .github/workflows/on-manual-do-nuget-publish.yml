@@ -8,8 +8,12 @@ env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   NUKE_TELEMETRY_OPTOUT: true
 
+permissions:
+  contents: read
+
 jobs:
   publish_job:
+    if: github.repository == 'JasperFx/jasperfx'
     runs-on: ubuntu-latest
 
     steps:

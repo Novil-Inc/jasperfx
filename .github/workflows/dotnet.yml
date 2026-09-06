@@ -26,8 +26,12 @@ env:
   DISABLE_TEST_PARALLELIZATION: true
   NUKE_TELEMETRY_OPTOUT: true
 
+permissions:
+  contents: read
+
 jobs:
   build:
+    if: github.repository == 'JasperFx/jasperfx'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
